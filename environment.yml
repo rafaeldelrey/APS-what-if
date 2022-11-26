@@ -1,0 +1,7 @@
+name: autoisf
+dependencies:
+  - python=3.9
+  - ipywidgets
+  - pip
+  - pip:
+    - -r requirements.txt
