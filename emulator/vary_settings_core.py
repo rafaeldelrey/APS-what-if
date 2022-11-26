@@ -19,7 +19,11 @@ import binascii
 import copy
 
 import determine_basal as detSMB
-from determine_basal import my_ce_file 
+from determine_basal import my_ce_file
+
+from js_run import load_determine_basal
+
+
 
 def get_version_core(echo_msg):
     echo_msg['vary_settings_core.py'] = '2022-10-03 00:35'
@@ -541,6 +545,29 @@ def getOrigPred(predBGs):
     #print ('orig preds --> '+str(Fcasts))
     return Fcasts
 
+
+from determine_basal import getMaxSafeBasal, setTempBasal
+
+
+def setTempBasalLocal(rate, duration, profile, rT, currenttemp):
+    print(f"setTempBasal: {rate} {duration} {profile} {rT} {currenttemp}")
+    flows = []
+    ret = setTempBasal(rate.to_python(),
+                       duration.to_python(),
+                       profile.to_python().to_dict(),
+                       rT.to_python().to_dict(),
+                       currenttemp.to_python(),
+                       flows)
+    print(f"flows: {flows}")
+    return ret
+
+
+def getMaxSafeBasalLocal(profile):
+    print(f"getMaxSafeBasal: {profile}")
+    return getMaxSafeBasal(profile.to_python().to_dict())
+    # return 2.0
+
+
 def TreatLoop(Curly, log, lcount):
     global SMBreason, newLoop
     global loop_mills, loop_label, bgTimeMap
@@ -550,6 +577,7 @@ def TreatLoop(Curly, log, lcount):
     global origBasal, lastBasal
     global longDelta, avgDelta, longSlope, rateSlope, glucose_status, origISF, BZ_ISF, Delta_BZ, emulISF, origAI_ratio, emulAI_ratio
     global Pred, FlowChart, Fits
+
     #print('\nentered TreatLoop for row '+str(lcount)+' ending with  /'+Curly[-1]+'/ having '+Curly[780:800]+'\n'+Curly)
     wo_apo = Curly.find("\'")
     if wo_apo>0:
@@ -687,7 +715,34 @@ def TreatLoop(Curly, log, lcount):
         
         #if profile['new_parameter']['bestParabola']:       dura_p, delta_p, parabs, iMax = getBestParabolaBG(len(bg)-1)
         
+        iob_data_bak = iob_data.copy()
         reT = detSMB.determine_basal(glucose_status, currenttemp, iob_data, profile, autosens_data, meal_data, tempBasalFunctionsDummy, MicroBolusAllowed, reservoir, thisTime, Fcasts, Flows, emulAI_ratio)
+
+        # Run js version of determine_basal
+        det_basal = load_determine_basal("determine-basal-orig.js")
+
+        tempBasalFunctions = dict(
+            setTempBasal=setTempBasalLocal,
+            getMaxSafeBasal=getMaxSafeBasalLocal,
+        )
+        isSaveCgmSource = True
+        rt_js = det_basal(glucose_status,
+                          currenttemp,
+                          iob_data_bak,
+                          profile,
+                          autosens_data,
+                          meal_data,
+                          tempBasalFunctions,
+                          MicroBolusAllowed,
+                          reservoir,
+                          thisTime,
+                          isSaveCgmSource)
+        print("\n========================")
+        print(reT)
+        print("------------------------")
+        print(rt_js)
+        print("========================\n")
+
         newLoop = False
         if len(origAI_ratio)<len(emulAI_ratio):
             origAI_ratio.append(10.0)                   # not found in original console_error
