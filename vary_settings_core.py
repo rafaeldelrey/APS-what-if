@@ -21,6 +21,11 @@ import copy
 import determine_basal as detSMB
 from determine_basal import my_ce_file 
 
+def get_version_core(echo_msg):
+    echo_msg['vary_settings_core.py'] = '2022-10-03 00:35'
+    return echo_msg
+
+
 
 def hole(sLine, Ab, Auf, Zu):
     #E extrahiere Substring ab der Stelle "ab"
@@ -294,6 +299,14 @@ def setVariant(stmp):
     new_parameter['AAPS_Version'] = AAPS_Version        ### place it before so it could be modified later
     new_parameter['LessSMBatModerateBG'] = False        ### additional parameter; AAPS is fix at False; reduce SMB if ...
     new_parameter['LessSMBbelow'] = 0.0                 ### ... bg below this value
+    if 'iobTHtolerance' not in new_parameter:
+        new_parameter['iobTHtolerance'] = 100           ### not known before ai3.0
+    if 'iob_threshold_percent' not in profile:
+        profile['iob_threshold_percent'] = 100          ### not known before ai3.0
+    if 'profile_percentage' not in profile:
+        profile['profile_percentage'] = 100             ### not known before ai3.0
+    if 'enableSMB_EvenOn_OddOff' not in profile:
+        profile['enableSMB_EvenOn_OddOff'] = False      ### not known before ai2.2.7
     if AAPS_Version == '<2.7':                          
         profile['maxUAMSMBBasalMinutes'] = 30           ### use the 2.7 default just in case
         profile['bolus_increment'] = 0.1                ### use the 2.7 default just in case
@@ -980,7 +993,13 @@ def scanLogfile(fn, entries):
     cont = 'MORE'                               # in case nothing found
     while notEOF:                               # needed because "for zeile in lf" does not work with AAPS 2.5
         try:                                    # needed because "for zeile in lf" does not work with AAPS 2.5
-            zeile = lf.readline()               # needed because "for zeile in lf" does not work with AAPS 2.5
+            while True:
+                try:
+                    zeile = lf.readline()           # needed because "for zeile in lf" does not work with AAPS 2.5
+                    break
+                except FileNotFoundError:
+                    log_msg('waiting 10s for logfile housekeeping')
+                    time.sleep(10)
             if isZip:   zeile = str(zeile)[2:-3]# strip off the "'b....'\n" remaining from the bytes to str conversion
             if zeile == '':                     # needed because "for zeile in lf" does not work with AAPS 2.5
                 notEOF = False                  # needed because "for zeile in lf" does not work with AAPS 2.5

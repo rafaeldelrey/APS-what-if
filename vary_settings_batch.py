@@ -7,6 +7,12 @@ from datetime import datetime, timedelta
 from vary_settings_core import parameters_known
 from vary_settings_core import set_tty
 
+from vary_settings_core import get_version_core
+from determine_basal    import get_version_determine_basal
+def get_version_batch(echo_msg):
+    echo_msg['vary_settings_batch.py'] = '2022-10-06 23:00'
+    return echo_msg
+
 def mydialog(title,buttons=["OK"],items=[],multi=False,default_pick=[0,1]):
     # adapted from "https://stackoverflow.com/questions/51874555/qpython3-and-androidhelper-droid-dialogsetsinglechoiceitems"
     title = str(title)
@@ -29,6 +35,7 @@ def mydialog(title,buttons=["OK"],items=[],multi=False,default_pick=[0,1]):
         res0={"positive":0,"neutral":2,"negative":1}[res0["which"]]
     else:
         res0=-1
+    droid.dialogDismiss()                       # important for Android12
     return res0,res
 
 def waitNextLoop(arg,varName):                  # arg = hh:mm:ss of last loop execution, optionally appended 'Z'
@@ -52,7 +59,7 @@ def waitNextLoop(arg,varName):                  # arg = hh:mm:ss of last loop ex
             waitSec = 60                        # was even negative sometimes
     then = datetime.now() + timedelta(seconds=waitSec)
     thenStr = format(then, '%H:%M')
-    print ('Variant "' + varName + '"\nwaiting ' + str(waitSec) + ' sec for next loop at '+ thenStr)
+    print ('\nWaiting ' + str(waitSec) + 'sec for next loop at '+ thenStr + ';   Variant "' + varName + '"')
     return waitSec
 
 def alarmHours(titel):
@@ -72,14 +79,14 @@ def alarmHours(titel):
         elif pressed_button == 1:           sys.exit()                      # EXIT
     return pick
 
-def echo_version(mdl):
-    global echo_msg
-    #mdl= 'vary_settings_batch.py'
-    stamp = os.stat(varyHome + mdl)
-    stposx= datetime.fromtimestamp(stamp.st_mtime)
-    ststr = datetime.strftime(stposx, "%Y-%m-%d %H:%M:%S")
-    echo_msg[ststr] = mdl
-    return 
+#def echo_version(mdl):
+#    global echo_msg
+#    #mdl= 'vary_settings_batch.py'
+#    stamp = os.stat(varyHome + mdl)
+#    stposx= datetime.fromtimestamp(stamp.st_mtime)
+#    ststr = datetime.strftime(stposx, "%Y-%m-%d %H:%M:%S")
+#    echo_msg[ststr] = mdl
+#    return 
 
 ###############################################
 ###    start of main                        ###
@@ -196,11 +203,11 @@ if IsAndroid :
     m +='\n vary_settings home directory  ' + varyHome
     #global echo_msg
     echo_msg = {}
-    echo_version('vary_settings_batch.py')
-    echo_version('vary_settings_core.py')
-    echo_version('determine_basal.py')
+    echo_msg = get_version_batch(echo_msg)
+    echo_msg = get_version_core(echo_msg)
+    echo_msg = get_version_determine_basal(echo_msg)
     for ele in echo_msg:
-        m += '\n dated: '+ele + ',   module name: '+echo_msg[ele]
+        m += '\n dated: '+echo_msg[ele] + '       module name: '+ele
     m += '\n' + '='*66 + '\n'
 
 
@@ -241,16 +248,16 @@ else:                                                                           
     whereColon = varyHome.find(':')
     if whereColon < 0:
         varyHome = os.getcwd()
-    varyHome = os.path.dirname(varyHome) + '\\'
+    varyHome = os.path.dirname(varyHome) + os.sep   #'\\'
     m  = '='*66+'\nEcho of software versions used\n'+'-'*66
     m +='\n vary_settings home directory  ' + varyHome
     #global echo_msg
     echo_msg = {}
-    echo_version('vary_settings_batch.py')
-    echo_version('vary_settings_core.py')
-    echo_version('determine_basal.py')
+    echo_msg = get_version_batch(echo_msg)
+    echo_msg = get_version_core(echo_msg)
+    echo_msg = get_version_determine_basal(echo_msg)
     for ele in echo_msg:
-        m += '\n dated: '+ele + ',   module name: '+echo_msg[ele]
+        m += '\n dated: '+echo_msg[ele] + '       module name: '+ele
     m += '\n'+'-'*66+'\nEcho of execution parameters used\n'+'-'*66
     m += '\nLogfiles to scan      ' + sys.argv[1]
     m += '\nOutput options        ' + sys.argv[2]
