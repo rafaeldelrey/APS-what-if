@@ -9,6 +9,7 @@ from vary_settings_core import set_tty
 
 from vary_settings_core import get_version_core
 from determine_basal    import get_version_determine_basal
+
 def get_version_batch(echo_msg):
     echo_msg['vary_settings_batch.py'] = '2022-10-06 23:00'
     return echo_msg

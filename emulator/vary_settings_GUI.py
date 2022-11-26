@@ -17,10 +17,13 @@ from vary_settings_core import log_msg, sub_issue
 
 from vary_settings_core import get_version_core
 from determine_basal    import get_version_determine_basal
-def get_version_GUI(echo_msg):
-    echo_msg['vary_settings_GUI.py'] = '2022-10-03 00:54'
-    return echo_msg
 
+from common import open_file
+
+
+def get_version_GUI(echo_msg):
+    echo_msg['vary_settings_GUI.py'] = '2022-11-25 20:30'
+    return echo_msg
 
 
 #################################################################################
@@ -41,7 +44,7 @@ root = Tk()
 root.title('Manage Inputs and Outputs for Emulating AAPS Settings')
 root.columnconfigure(0, weight=1)
 root.rowconfigure(2, weight=1)
-ttk.Sizegrip(root).grid(column=999, row=999, sticky=(S,E))
+ttk.Sizegrip(root).grid(column=999, row=999, sticky=(S, E))
 #root['width']  = 600
 #root['height'] = 500
 
@@ -145,7 +148,7 @@ def get_vfil():
 
 def edit_vfil():
     oldvf = vfil.get()
-    os.startfile(oldvf)                                                         # requires DOS knows to edit ".dat" files
+    open_file(oldvf)                                                         # requires DOS knows to edit ".dat" files
 
 inpframe.columnconfigure(0, weight=1)
 inpframe.columnconfigure(1, weight=1)
@@ -567,7 +570,7 @@ def get_pdffil():
 def edit_logfil():
     oldvf = logfil.get()
     try:
-        os.startfile(oldvf)                                                     # requires DOS knows to edit ".log" files
+        open_file(oldvf)                                                     # requires DOS knows to edit ".log" files
     except:                                                                     # catch *all* exceptions
         book.select(4)                                                          # activate result tab
         tb = sys.exc_info()[2]
@@ -576,10 +579,11 @@ def edit_logfil():
             sub_issue(ele[:-1])                                                 # sub appends <CR>
         sub_issue(str(sys.exc_info()[1]))
 
+
 def edit_deltafil():
     oldvf = deltafil.get()
     try:
-        os.startfile(oldvf)                                                     # requires DOS knows to edit ".delta" files
+        open_file(oldvf)                                                     # requires DOS knows to edit ".delta" files
     except:                                                                     # catch *all* exceptions
         book.select(4)                                                          # activate result tab
         tb = sys.exc_info()[2]
@@ -591,7 +595,7 @@ def edit_deltafil():
 def edit_tabfil():
     oldvf = tabfil.get()
     try:
-        os.startfile(oldvf)                                                     # requires DOS knows to edit ".csv" files
+        open_file(oldvf)                                                     # requires DOS knows to edit ".csv" files
     except:                                                                     # catch *all* exceptions
         book.select(4)                                                          # activate result tab
         tb = sys.exc_info()[2]
@@ -603,7 +607,7 @@ def edit_tabfil():
 def edit_txtorig():
     oldvf = txtorig.get()
     try:
-        os.startfile(oldvf)                                                     # requires DOS knows to edit ".log" files
+        open_file(oldvf)                                                     # requires DOS knows to edit ".log" files
     except:                                                                     # catch *all* exceptions
         book.select(4)                                                          # activate result tab
         tb = sys.exc_info()[2]
@@ -615,7 +619,7 @@ def edit_txtorig():
 def edit_txtemul():
     oldvf = txtemul.get()
     try:
-        os.startfile(oldvf)                                                     # requires DOS knows to edit ".log" files
+        open_file(oldvf)                                                     # requires DOS knows to edit ".log" files
     except:                                                                     # catch *all* exceptions
         book.select(4)                                                          # activate result tab
         tb = sys.exc_info()[2]
@@ -627,7 +631,7 @@ def edit_txtemul():
 def edit_pdffil():
     oldvf = pdffil.get()
     try:
-        os.startfile(oldvf)                                                     # requires DOS knows to open ".pdf" files
+        open_file(oldvf)                                                     # requires DOS knows to open ".pdf" files
     except:                                                                     # catch *all* exceptions
         book.select(4)                                                          # activate result tab
         tb = sys.exc_info()[2]
